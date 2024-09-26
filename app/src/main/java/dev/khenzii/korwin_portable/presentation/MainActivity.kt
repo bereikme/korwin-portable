@@ -11,9 +11,9 @@ import android.view.InputDevice
 import android.view.MotionEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import dev.khenzii.korwin_portable.presentation.theme.KorwinportableTheme
 import dev.khenzii.Korwin
+import dev.khenzii.korwin_portable.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -77,16 +79,23 @@ class MainActivity : ComponentActivity() {
         KorwinportableTheme {
             boxScrollState = rememberScrollState()
             boxCoroutineScope = rememberCoroutineScope()
-    
+               
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(50.dp)
-                    .verticalScroll(boxScrollState)
-                    .background(MaterialTheme.colors.background),
-                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize(),
             ) {
-                Quote(initialText)
+                Image(
+                    painter = painterResource(id = R.drawable.korwin),
+                    contentDescription = "A high quality image of Janusz Korwin-Mikke",
+                )
+
+                Box(
+                    modifier = Modifier
+                        .padding(50.dp)
+                        .verticalScroll(boxScrollState),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Quote(initialText)
+                }
             }
         }
     }
