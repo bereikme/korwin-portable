@@ -24,9 +24,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
@@ -106,8 +108,9 @@ fun Quote(content: String) {
     Text(
         modifier = Modifier.fillMaxWidth(),
         textAlign = TextAlign.Center,
-        color = MaterialTheme.colors.primary,
+        color = Color.White,
         text = content,
         fontSize = 20.sp,
+        style = TextStyle(shadow = Shadow(blurRadius = 10.0f)),
     )
 }
