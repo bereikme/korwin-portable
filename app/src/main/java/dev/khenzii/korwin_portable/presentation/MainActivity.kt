@@ -11,21 +11,27 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
-import androidx.wear.compose.material.TimeText
-import dev.khenzii.korwin_portable.R
+import androidx.compose.ui.unit.sp;
+import androidx.compose.ui.unit.dp
 import dev.khenzii.korwin_portable.presentation.theme.KorwinportableTheme
+import dev.khenzii.Korwin;
+import kotlinx.coroutines.coroutineScope
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,38 +42,42 @@ class MainActivity : ComponentActivity() {
         setTheme(android.R.style.Theme_DeviceDefault)
 
         setContent {
-            WearApp("Android")
+            App(Korwin.generateStatement())
         }
     }
 }
 
 @Composable
-fun WearApp(greetingName: String) {
+fun App(initialText: String = "") {
     KorwinportableTheme {
+        val scrollState = rememberScrollState()
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(50.dp)
+                .verticalScroll(scrollState)
                 .background(MaterialTheme.colors.background),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
-            TimeText()
-            Greeting(greetingName = greetingName)
+            Quote(initialText)
         }
     }
 }
 
 @Composable
-fun Greeting(greetingName: String) {
+fun Quote(content: String) {
     Text(
         modifier = Modifier.fillMaxWidth(),
         textAlign = TextAlign.Center,
         color = MaterialTheme.colors.primary,
-        text = stringResource(R.string.hello_world, greetingName)
+        text = content,
+        fontSize = 20.sp,
     )
 }
 
 @Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true)
 @Composable
 fun DefaultPreview() {
-    WearApp("Preview Android")
+    App()
 }
