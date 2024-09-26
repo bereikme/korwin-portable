@@ -7,11 +7,13 @@
 package dev.khenzii.korwin_portable.presentation
 
 import android.os.Bundle
+import android.view.InputDevice
+import android.view.MotionEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.ScrollState
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,21 +21,27 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
-import androidx.compose.ui.unit.sp;
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import dev.khenzii.korwin_portable.presentation.theme.KorwinportableTheme
-import dev.khenzii.Korwin;
-import kotlinx.coroutines.coroutineScope
+import dev.khenzii.Korwin
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlin.ranges.coerceIn
 
 class MainActivity : ComponentActivity() {
+    private var boxScrollState: ScrollState = ScrollState(0)
+    private var boxCoroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main + Job())
+    private var currentScrollValue: Int = 0
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
 
@@ -45,22 +53,41 @@ class MainActivity : ComponentActivity() {
             App(Korwin.generateStatement())
         }
     }
-}
 
-@Composable
-fun App(initialText: String = "") {
-    KorwinportableTheme {
-        val scrollState = rememberScrollState()
+    // Scroll quote text on bezel turn.
+    override fun onGenericMotionEvent(event: MotionEvent): Boolean {
+        if (event.action == MotionEvent.ACTION_SCROLL && event.isFromSource(InputDevice.SOURCE_ROTARY_ENCODER)) {
+            val scrollValue = event.getAxisValue(MotionEvent.AXIS_SCROLL)
+            val relativeScrollValue = (scrollValue * 50).toInt()
+            
+            currentScrollValue -= relativeScrollValue
+            currentScrollValue = currentScrollValue.coerceIn(0, boxScrollState.maxValue)
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(50.dp)
-                .verticalScroll(scrollState)
-                .background(MaterialTheme.colors.background),
-            contentAlignment = Alignment.Center,
-        ) {
-            Quote(initialText)
+            boxCoroutineScope.launch {
+                boxScrollState.scrollTo(currentScrollValue)
+            }
+
+            return true
+        }
+        return super.onGenericMotionEvent(event)
+    }
+
+    @Composable
+    fun App(initialText: String = "") {
+        KorwinportableTheme {
+            boxScrollState = rememberScrollState()
+            boxCoroutineScope = rememberCoroutineScope()
+    
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(50.dp)
+                    .verticalScroll(boxScrollState)
+                    .background(MaterialTheme.colors.background),
+                contentAlignment = Alignment.Center,
+            ) {
+                Quote(initialText)
+            }
         }
     }
 }
@@ -74,10 +101,4 @@ fun Quote(content: String) {
         text = content,
         fontSize = 20.sp,
     )
-}
-
-@Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true)
-@Composable
-fun DefaultPreview() {
-    App()
 }
